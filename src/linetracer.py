@@ -18,8 +18,16 @@ if cap.isOpened():
             cv2.imshow('camera', img)
             cv2.imshow('grayscale', gray)
             cv2.imshow('hsv', hsv)
-            if cv2.waitKey(1) == ord('q'):
+            if cv2.waitKey(1) == ord('q'): # q 키 입력시 출력 종료
                 break
+            elif cv2.waitKey(1) == 32: # 스페이스바 입력시 이미지 캡처 > 히스토그램 출력
+                cv2.imwrite('../img/capture.jpg', img)
+                histimg = cv2.imread('../img/capture.jpg', cv2.IMREAD_GRAYSCALE)
+                hist = cv2.calcHist([histimg], [0], None, [256], [0,256])
+                plt.plot(hist)
+                cv2.destroyAllWindows()
+                cv2.imshow('image', histimg)
+                plt.show()
         else:
             print('no frame')
             break
