@@ -29,13 +29,15 @@ if cap.isOpened():
     while True:
         ret, img = cap.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5,5), 0)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         draw = img.copy()
-        
+        canny = cv2.Canny(gray, 150, 255)
         if ret:
-            ret2, threshold = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY_INV)
+            #ret2, threshold = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY_INV)
             #threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUCIAN_C, cv2.THRESH_BINARY_INV, 9, 5)
-            contour, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            
+            contour, hierarchy = cv2.findContours(canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             mu = [None]*len(contour)
             for i in range(len(contour)):
                 mu[i] = cv2.moments(contour[i])
@@ -46,7 +48,7 @@ if cap.isOpened():
             cv2.drawContours(img, contour, -1, (255,0,0), 2)
             cv2.imshow('camera', img)
             cv2.imshow('hsv', hsv)
-            cv2.imshow('binary', threshold)
+            cv2.imshow('binary', canny)
             if cv2.waitKey(1) == ord('e'): # e 키 입력을 통해 ROI 선택 상태에 진입하도록 설정
                 (x,y,w,h) = cv2.selectROI(window, img, False)
                 if w > 0 and h > 0:
