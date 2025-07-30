@@ -3,6 +3,7 @@ import numpy as np
 
 img = cv2.imread('../img/bad_rect.png')
 img2 = img.copy()
+diff = 0.05
 
 # 그레이 스케일로 변환
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -15,7 +16,10 @@ contour, hierarchy = cv2.findContours(imthres, cv2.RETR_EXTERNAL, \
                                              cv2.CHAIN_APPROX_SIMPLE)
 
 contours = contour[0]
-epsilon = 0.05 * cv2.arcLength(contours, True)
+
+# 오차 범위 지정
+epsilon = diff * cv2.arcLength(contours, True)
+# 근사 컨투어 계산
 approx = cv2.approxPolyDP(contours, epsilon, True)
 
 cv2.drawContours(img, [contours], -1, (0, 255, 0), 3)
