@@ -9,25 +9,21 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
+# matplot 설정
+plt.ion()
+
 if cap.isOpened():
     while True:
         ret, img = cap.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         if ret:
+            ret2, threshold = cv2.threshold(gray, 125, 255, cv2.THRESH_BINARY_INV)
+            contour, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(img, contour, -1, (255,0,0), 3)
             cv2.imshow('camera', img)
-            cv2.imshow('grayscale', gray)
-            cv2.imshow('hsv', hsv)
             if cv2.waitKey(1) == ord('q'): # q 키 입력시 출력 종료
                 break
-            elif cv2.waitKey(1) == 32: # 스페이스바 입력시 이미지 캡처 > 히스토그램 출력
-                cv2.imwrite('../img/capture.jpg', img)
-                histimg = cv2.imread('../img/capture.jpg', cv2.IMREAD_GRAYSCALE)
-                hist = cv2.calcHist([histimg], [0], None, [256], [0,256])
-                plt.plot(hist)
-                cv2.destroyAllWindows()
-                cv2.imshow('image', histimg)
-                plt.show()
         else:
             print('no frame')
             break
