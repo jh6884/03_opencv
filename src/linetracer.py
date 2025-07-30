@@ -12,17 +12,37 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 # matplot 설정
 plt.ion()
 
+window = 'camera'
+
+def masking(bp, window):
+    _, mask = cv2.threshold(bp, 1, 255, cv2.THRESH_BINARY)
+    result = cv2.bitwise_and(img, img, mask=mask)
+    cv2.imshow(window, result)
+
+def backProject_cv(hist_roi):
+    bp = cv2.calcBackProject([hsv], [0, 1], hist_roi,  [0, 180, 0, 256], 1)
+    masking(bp,'result_cv')    
+
 if cap.isOpened():
     while True:
         ret, img = cap.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        draw = img.copy()
         if ret:
             ret2, threshold = cv2.threshold(gray, 125, 255, cv2.THRESH_BINARY_INV)
             contour, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            cv2.drawContours(img, contour, -1, (255,0,0), 3)
+            cv2.drawContours(img, contour, -1, (255,0,0), 2)
             cv2.imshow('camera', img)
-            if cv2.waitKey(1) == ord('q'): # q 키 입력시 출력 종료
+            if cv2.waitKey(1) == ord('e'): # e 키 입력을 통해 ROI 선택 상태에 진입하도록 설정
+                (x,y,w,h) = cv2.selectROI(window, img, False)
+                if w > 0 and h > 0:
+                    roi = draw[y:y+h, x:x+w]
+                    cv2.rectangle(draw, (x, y), (x+w, y+h), (0,0,255), 2)
+                    hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+                    hist_roi = cv2.calcHist([hsv_roi],[0, 1], None, [180, 256], [0, 180, 0, 256] )
+                    backProject_cv(hist_roi)
+            elif cv2.waitKey(1) == ord('q'): # q 키 입력시 출력 종료
                 break
         else:
             print('no frame')
